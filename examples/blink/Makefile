@@ -1,5 +1,7 @@
 #
-# Copyright (c) 2015 MaiKe Labs <http://noduino.org>
+# Copyright (c) 2015 MaiKe Labs
+#
+# Based on official SDK and source-code-examples project
 #
 #
 
