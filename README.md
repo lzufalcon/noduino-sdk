@@ -1,7 +1,7 @@
 Noduino SDK
 ===========================================
 
-This is a Professional SDK developed by MaKe Labs for ESP8266 WiFi SoC
+This is a Professional SDK developed by MaiKe Labs for ESP8266 WiFi SoC
 
 This project brings support for ESP8266 chip to the professional embeded environment. It lets you write sketches using C language quickly, and run them directly on ESP8266, no external microcontroller required.
 
