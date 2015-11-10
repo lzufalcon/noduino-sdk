@@ -75,7 +75,7 @@ ESPSDK_LIBDIR	:= $(addprefix -L$(ESPSDK_BASE)/,$(ESPSDK_LIBDIR))
 LD_SCRIPT		:= $(addprefix -T$(ESPSDK_BASE)/$(ESPSDK_LDDIR)/,$(LD_SCRIPT))
 
 INCDIR			:= $(addprefix -I,$(SRC_DIR))
-MODULE_INCDIR	:= $(addsuffix /include,$(INCDIR))
+MODULE_INCDIR	:= -I include
 
 SRC			:= $(foreach sdir,$(SRC_DIR),$(wildcard $(sdir)/*.c))
 OBJ			:= $(patsubst %.c,$(BUILD_DIR)/%.o,$(SRC))
