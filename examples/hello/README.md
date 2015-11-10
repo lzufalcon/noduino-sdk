@@ -1,4 +1,4 @@
-Nduino Hello World
+Noduino SDK - Hello World
 ===========================================
 
 This simple project show how to output "Hello World" to the UART0 of

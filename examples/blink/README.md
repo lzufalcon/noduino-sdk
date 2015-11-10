@@ -1,4 +1,4 @@
-Noduino Blink example
+Noduino SDK - Blink example
 ===========================================
 
 This simple project show how to flush the blue LED in NodeMCU V1.0 board
