@@ -19,7 +19,7 @@ TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
 # paths from the SDK used in this project
 SDK_INCDIR	= include include/driver
-SDK_LIBDIR = lib lib/driver
+SDK_LIBDIR = lib
 
 # various paths from the ESPSDK used in this project
 ESPSDK_INCDIR	= include include/json
@@ -32,8 +32,22 @@ LIBS		+= crypto espnow json lwip_536 lwip mesh net80211 phy pp pwm smartconfig s
 LIBS		+= driver
 
 # esptool path and port
-ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
-ESPPORT		?= /dev/ttyUSB0
+ifeq ($(OS),Windows_NT)
+	ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool.exe
+	FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool.exe
+	ESPPORT		?= COM3
+else
+	ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
+	FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
+
+	UNAME_S		:= $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		ESPPORT		?= /dev/cu.SLAB_USBtoUART
+	endif
+	ifeq ($(UNAME_S),Linux)
+		ESPPORT		?= /dev/ttyUSB0
+	endif
+endif
 
 # firmware generating tool
 FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
@@ -129,7 +143,7 @@ $(BUILD_BASE):
 firmware:
 	$(Q) mkdir -p $@
 
-flash: $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
+flash: all $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
 	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x00000 -cf $(FW_BASE)/0x00000.bin -ca 0x40000 -cf $(FW_BASE)/0x40000.bin
 
 clean:
