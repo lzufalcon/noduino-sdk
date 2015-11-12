@@ -13,7 +13,7 @@ BUILD_DIR	= build
 FW_BASE		= build
 
 # base directory of the SDK package, absolute
-SDK_BASE		?= ../../
+SDK_BASE		?= ../..
 ESPSDK_BASE		?= $(SDK_BASE)/sdk
 TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 

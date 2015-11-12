@@ -8,6 +8,7 @@
 #include "ets_sys.h"
 #include "osapi.h"
 
+#include "driver/uart.h"
 #include "user_interface.h"
 #include "smartconfig.h"
 
@@ -33,7 +34,9 @@ void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
 		os_printf("SC_STATUS_LINK\n");
 		struct station_config *sta_conf = pdata;
 
+		os_printf("Store the ssid and password into flash\n");
 		wifi_station_set_config(sta_conf);
+
 		wifi_station_disconnect();
 		wifi_station_connect();
 		break;
@@ -59,10 +62,12 @@ void user_rf_pre_init(void)
 
 void user_init(void)
 {
+	uart_init(BIT_RATE_115200, BIT_RATE_115200);
+
 	os_printf("SDK version:%s\n", system_get_sdk_version());
 
 	//SC_TYPE_ESPTOUCH,SC_TYPE_AIRKISS,SC_TYPE_ESPTOUCH_AIRKISS
-	smartconfig_set_type(SC_TYPE_ESPTOUCH);
+	smartconfig_set_type(SC_TYPE_AIRKISS);
 
 	wifi_set_opmode(STATION_MODE);
 
