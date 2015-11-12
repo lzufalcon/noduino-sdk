@@ -1,6 +1,5 @@
 **esp_mqtt**
 ==========
-![](https://travis-ci.org/tuanpmt/esp_mqtt.svg?branch=master)
 
 This is MQTT client library for ESP8266, port from: [MQTT client library for Contiki](https://github.com/esar/contiki-mqtt) (thanks)
 
@@ -14,35 +13,6 @@ This is MQTT client library for ESP8266, port from: [MQTT client library for Con
  * Easy to setup and use
  * Update support SDK 1.3
 
-**Compile:**
-
-Make sure to add PYTHON PATH and compile PATH to Eclipse environment variable if using Eclipse
-
-for Windows:
-
-```bash
-git clone --recursive https://github.com/tuanpmt/esp_mqtt
-cd esp_mqtt
-#clean
-mingw32-make clean
-#make
-mingw32-make SDK_BASE="c:/Espressif/ESP8266_SDK" FLAVOR="release" all
-#flash
-mingw32-make ESPPORT="COM1" flash
-```
-
-for Mac or Linux:
-
-```bash
-git clone --recursive https://github.com/tuanpmt/esp_mqtt
-cd esp_mqtt
-#clean
-make clean
-#make
-make SDK_BASE="/opt/Espressif/ESP8266_SDK" FLAVOR="release" all
-#flash
-make ESPPORT="/dev/ttyUSB0" flash
-```
 
 **Usage**
 ```c
@@ -245,17 +215,9 @@ function setup() {
 
 [MQTT Client for test](https://chrome.google.com/webstore/detail/mqttlens/hemojaaeigabkbcookmlgmdigohjobjm?hl=en)
 
-**Contributing:**
-
-***Feel free to contribute to the project in any way you like!***
-
-**Requried:**
-
-SDK esp_iot_sdk_v0.9.4_14_12_19 or higher
 
 **Authors:**
 [Tuan PM](https://twitter.com/TuanPMT)
-
 
 
 **LICENSE - "MIT License"**
