@@ -17,6 +17,13 @@
 
 int ack_count = 0;
 
+u8 key[16] = { 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33,
+	0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44};
+
+u8 ctrl_mac[6] = { 0x18, 0xfe, 0x34, 0xf9, 0x0f, 0x17 };
+u8 slave_mac[6] = { 0x1a, 0xfe, 0x34, 0xf3, 0x73, 0xfc };
+
+
 void ICACHE_FLASH_ATTR simple_cb(u8 * macaddr, u8 * data, u8 len)
 {
 	int i;
@@ -36,20 +43,37 @@ void ICACHE_FLASH_ATTR simple_cb(u8 * macaddr, u8 * data, u8 len)
 	esp_now_send(macaddr, ack_buf, os_strlen(ack_buf));
 }
 
-void ICACHE_FLASH_ATTR demo_send_(u8 * data, u8 len)
+int ICACHE_FLASH_ATTR demo_send(u8 * data, u8 len)
 {
-	/* the demo will send to two devices which added by esp_now_add_peer() */
-	esp_now_send(NULL, data, len);
+	if (esp_now_is_peer_exist(slave_mac) == 0) {
+		os_printf("The espnow peer does not exist\n");
+		return 0;
+	} else {
 
+		u8 old_ch = wifi_get_channel();
+
+		u8 s_ch = esp_now_get_peer_channel(slave_mac);
+		os_printf("before set: slave ch: %d\n", s_ch);
+
+		u8 c_ch = esp_now_get_peer_channel(ctrl_mac);
+		os_printf("before espnow send: ctrl ch: %d\n",c_ch);
+
+		esp_now_set_peer_channel(slave_mac, c_ch);
+		//wifi_set_channel(s_ch);
+		
+		s_ch = esp_now_get_peer_channel(slave_mac);
+		os_printf("after set: slave ch: %d\n", s_ch);
+
+		/* the demo will send to two devices which added by esp_now_add_peer() */
+		int ret = esp_now_send(NULL, data, len);
+
+		wifi_set_channel(old_ch);
+		return ret;
+	}
 }
 
 void ICACHE_FLASH_ATTR node_group_init(void)
 {
-	u8 key[16] = { 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33,
-		0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44};
-	u8 da1[6] = { 0x18, 0xfe, 0x34, 0x97, 0xd5, 0xb1 };
-	u8 da2[6] = { 0x1a, 0xfe, 0x34, 0x97, 0xd5, 0xb1 };
-
 	if (esp_now_init() == 0) {
 		os_printf("esp_now init ok\n");
 		esp_now_register_recv_cb(simple_cb);
@@ -58,8 +82,8 @@ void ICACHE_FLASH_ATTR node_group_init(void)
 		os_printf("dlink send to A cur chan %d\n", ch);
 
 		esp_now_set_self_role(ESP_NOW_ROLE_CONTROLLER);
-		esp_now_add_peer(da1, ESP_NOW_ROLE_CONTROLLER, ch, key, 16);
-		esp_now_add_peer(da2, ESP_NOW_ROLE_SLAVE, ch, key, 16);
+		esp_now_add_peer(ctrl_mac, ESP_NOW_ROLE_CONTROLLER, ch, key, 16);
+		esp_now_add_peer(slave_mac, ESP_NOW_ROLE_SLAVE, ch, key, 16);
 	} else {
 		os_printf("esp_now init failed\n");
 	}
@@ -72,10 +96,9 @@ void ICACHE_FLASH_ATTR espnow_check_cb(void *arg)
 	if (esp_now_get_cnt_info(&all_cnt, &encrypt_cnt)) {
 		os_printf("get_cnt_info failed\r\n");
 		os_printf("client:%d, encrypted client:%d\r\n", all_cnt, encrypt_cnt);
-		os_printf("send ");
 	}
 
-	if (esp_now_send(NULL, "Hello", 6)) {
+	if (demo_send("Hello", 6)) {
 		os_printf("esp_now_send fail\r\n");
 	} else {
 		os_printf("esp_now_send ok\r\n");
@@ -89,9 +112,10 @@ void user_init(void)
 	uart_init(115200, 115200);
 
 	wifi_set_opmode(STATION_MODE);
+	wifi_set_macaddr(STATION_IF, ctrl_mac);
 
 	node_group_init();
 
 	os_timer_setfn(&client_timer, (os_timer_func_t *)espnow_check_cb, NULL);
-	os_timer_arm(&client_timer, 1000, 0);
+	os_timer_arm(&client_timer, 5000, 1);
 }
