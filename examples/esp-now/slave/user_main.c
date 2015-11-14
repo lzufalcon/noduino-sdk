@@ -19,8 +19,8 @@ int ack_count = 0;
 u8 key[16] = { 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44, 0x33,
 	0x44, 0x33, 0x44, 0x33, 0x44, 0x33, 0x44};
 
-u8 ctrl_mac[6] = { 0x18, 0xfe, 0x34, 0xf9, 0x0f, 0x17 };
-u8 slave_mac[6] = { 0x1a, 0xfe, 0x34, 0xf3, 0x73, 0xfc };
+u8 ctrl_mac[6] = { 0x18, 0xfe, 0x34, 0xf9, 0x0f, 0x13 };
+u8 slave_mac[6] = { 0x1a, 0xfe, 0x34, 0xf3, 0x73, 0xf3 };
 
 void ICACHE_FLASH_ATTR simple_cb(u8 * macaddr, u8 * data, u8 len)
 {
@@ -32,7 +32,7 @@ void ICACHE_FLASH_ATTR simple_cb(u8 * macaddr, u8 * data, u8 len)
 		os_printf("%02X, ", macaddr[i]);
 	os_bzero(recv_buf, 17);
 	os_memcpy(recv_buf, data, len < 17 ? len : 16);
-	os_printf(" len: %d, data: %s]:", len, recv_buf);
+	os_printf(" len: %d, data: %s]\n", len, recv_buf);
 
 	//show_buf2(data, len);
 	if (os_strncmp(data, "ACK", 3) == 0)
