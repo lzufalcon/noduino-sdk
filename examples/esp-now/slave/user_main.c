@@ -30,9 +30,9 @@ void ICACHE_FLASH_ATTR simple_cb(u8 * macaddr, u8 * data, u8 len)
 	os_printf("now from[");
 	for (i = 0; i < 6; i++)
 		os_printf("%02X, ", macaddr[i]);
-	os_printf(" len: %d]:", len);
 	os_bzero(recv_buf, 17);
 	os_memcpy(recv_buf, data, len < 17 ? len : 16);
+	os_printf(" len: %d, data: %s]:", len, recv_buf);
 
 	//show_buf2(data, len);
 	if (os_strncmp(data, "ACK", 3) == 0)
@@ -49,24 +49,8 @@ int ICACHE_FLASH_ATTR demo_send(u8 * data, u8 len)
 		return 0;
 	} else {
 
-		u8 old_ch = wifi_get_channel();
-
-		u8 s_ch = esp_now_get_peer_channel(slave_mac);
-		os_printf("before set: slave ch: %d\n", s_ch);
-
-		u8 c_ch = esp_now_get_peer_channel(ctrl_mac);
-		os_printf("before espnow send: ctrl ch: %d\n",c_ch);
-
-		esp_now_set_peer_channel(slave_mac, c_ch);
-		//wifi_set_channel(s_ch);
-		
-		s_ch = esp_now_get_peer_channel(slave_mac);
-		os_printf("after set: slave ch: %d\n", s_ch);
-
 		/* the demo will send to two devices which added by esp_now_add_peer() */
 		int ret = esp_now_send(NULL, data, len);
-
-		wifi_set_channel(old_ch);
 		return ret;
 	}
 }
@@ -94,11 +78,11 @@ void ICACHE_FLASH_ATTR node_group_init(void)
 		esp_now_register_recv_cb(simple_cb);
 
 		u8 ch = wifi_get_channel();
-		os_printf("dlink send to A cur chan %d\n", ch);
+		os_printf("current wifi channel is: %d\n", ch);
 
 		esp_now_set_self_role(ESP_NOW_ROLE_SLAVE);
 		esp_now_add_peer(ctrl_mac, ESP_NOW_ROLE_CONTROLLER, ch, key, 16);
-		esp_now_add_peer(slave_mac, ESP_NOW_ROLE_SLAVE, ch, key, 16)
+		esp_now_add_peer(slave_mac, ESP_NOW_ROLE_SLAVE, ch, key, 16);
 	} else {
 		os_printf("esp_now init failed\n");
 	}
