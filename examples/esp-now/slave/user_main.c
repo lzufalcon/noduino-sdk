@@ -91,6 +91,7 @@ void ICACHE_FLASH_ATTR node_group_init(void)
 {
 	if (esp_now_init() == 0) {
 		os_printf("esp_now init ok\n");
+		esp_now_register_recv_cb(simple_cb);
 
 		u8 ch = wifi_get_channel();
 		os_printf("dlink send to A cur chan %d\n", ch);
