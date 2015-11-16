@@ -7,6 +7,8 @@ This project brings support for ESP8266 chip to the professional embeded environ
 
 It has a lot of cool examples and reference sketches. You can make a smart IoT devices quickly based on these sketches.
 
+It's based on Espressif SDK 1.4.0
+
 
 ### Quick Start
 
