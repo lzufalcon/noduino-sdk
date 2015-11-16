@@ -15,7 +15,6 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-
 #include "osapi.h"
 #include "os_type.h"
 #include "user_interface.h"
