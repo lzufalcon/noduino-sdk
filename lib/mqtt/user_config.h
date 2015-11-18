@@ -1,7 +1,7 @@
 #ifndef _USER_CONFIG_H_
 #define _USER_CONFIG_H_
 
-#define MQTT_BUF_SIZE			1024
+#define MQTT_BUF_SIZE			1024	
 
 #define MQTT_RECONNECT_TIMEOUT 	5		/*second*/
 
