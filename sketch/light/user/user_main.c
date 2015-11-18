@@ -10,24 +10,25 @@
 #include "user_interface.h"
 #include "espconn.h"
 #include "os_type.h"
+#include "mem.h"
 
 #include "driver/uart.h"
 #include "airkiss.h"
 #include "smartconfig.h"
+#include "mqtt/mqtt.h"
 
 #define	DEBUG	1
 
+MQTT_Client mqttClient;
+
 LOCAL uint8_t check_ip_count = 0;
 
-//用于发送上线通知包的定时器,平台相关
 os_timer_t time_serv;
 os_timer_t client_timer;
 
-//UDP套接字相关变量,平台相关
 esp_udp airkiss_udp;
 struct espconn ptrairudpconn;
 
-//用于缓存回包的数据缓冲区,也可以为局部变量
 uint8_t lan_buf[200];
 uint16_t lan_buf_len;
 
@@ -35,7 +36,6 @@ uint16_t lan_buf_len;
 #define DEVICE_ID			"gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47"
 #define DEFAULT_LAN_PORT	12476
 
-//定义AirKiss库需要用到的一些标准函数,由对应的硬件平台提供,前三个为必要函数
 const airkiss_config_t akconf = {
 	(airkiss_memset_fn) & memset,
 	(airkiss_memcpy_fn) & memcpy,
@@ -43,11 +43,7 @@ const airkiss_config_t akconf = {
 	0
 };
 
-/*
-* 平台相关定时器中断处理函数, 比较正确的做法是在中断里面发送信号通知任务发送,
-* 这里为了方便说明直接发送
-*/
-static void time_callback(void)
+static void ICACHE_FLASH_ATTR time_callback(void)
 {
 	airkiss_udp.remote_port = DEFAULT_LAN_PORT;
 	airkiss_udp.remote_ip[0] = 255;
@@ -72,10 +68,7 @@ static void time_callback(void)
 	uart0_sendStr("Finish send notify!\r\n");
 }
 
-/*
-* 硬件平台相关,UDP监听端口数据接收处理函数
-*/
-void wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
+void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
 {
 	airkiss_lan_ret_t ret = airkiss_lan_recv(pdata, len, &akconf);
 	airkiss_lan_ret_t packret;
@@ -107,9 +100,6 @@ void wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
 	}
 }
 
-/*
-* 硬件平台相关,创建UDP套接字,监听12476端口
-*/
 void ICACHE_FLASH_ATTR airkiss_nff_start(void)
 {
 	airkiss_udp.local_port = 12476;
@@ -171,6 +161,45 @@ void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
 
 }
 
+void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
+{
+	MQTT_Client* client = (MQTT_Client*)args;
+	os_printf("MQTT: Connected\r\n");
+	MQTT_Subscribe(client, "/app2dev/gh_95fae", 0);
+	MQTT_Publish(client, "/dev2app/gh_95fae", "hello0", 6, 0, 0);
+}
+
+void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
+{
+	MQTT_Client* client = (MQTT_Client*)args;
+	os_printf("MQTT: Disconnected\r\n");
+}
+
+void ICACHE_FLASH_ATTR mqttPublishedCb(uint32_t *args)
+{
+	MQTT_Client* client = (MQTT_Client*)args;
+	os_printf("MQTT: Published\r\n");
+}
+
+void ICACHE_FLASH_ATTR mqttDataCb (uint32_t *args, const char* topic,
+	   	uint32_t topic_len, const char *data, uint32_t data_len)
+{
+	char *topicBuf = (char*)os_zalloc(topic_len+1),
+			*dataBuf = (char*)os_zalloc(data_len+1);
+
+	MQTT_Client* client = (MQTT_Client*)args;
+
+	os_memcpy(topicBuf, topic, topic_len);
+	topicBuf[topic_len] = 0;
+
+	os_memcpy(dataBuf, data, data_len);
+	dataBuf[data_len] = 0;
+
+	os_printf("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
+	os_free(topicBuf);
+	os_free(dataBuf);
+}
+
 void ICACHE_FLASH_ATTR cos_check_ip()
 {
 	struct ip_info ipconfig;
@@ -187,6 +216,7 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 
 		// start broadcast airkiss-nff udp pkg
 		airkiss_nff_start();
+		MQTT_Connect(&mqttClient);
 	} else {
 		// idle or connecting
 		os_timer_setfn(&client_timer, (os_timer_func_t *)cos_check_ip, NULL);
@@ -202,6 +232,8 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 			// reset the count
 			check_ip_count = 0;
 		}
+
+		MQTT_Disconnect(&mqttClient);
 	}
 }
 
@@ -211,5 +243,16 @@ void ICACHE_FLASH_ATTR user_init(void)
 	uart_init(115200, 115200);
 #endif
 
+	MQTT_InitConnection(&mqttClient, "101.200.202.247", 1883, 0);
+	MQTT_InitClient(&mqttClient, "noduino_falcon", "", "", 120, 1);
+
+	//MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
+
+	MQTT_OnConnected(&mqttClient, mqttConnectedCb);
+	MQTT_OnDisconnected(&mqttClient, mqttDisconnectedCb);
+	MQTT_OnPublished(&mqttClient, mqttPublishedCb);
+	MQTT_OnData(&mqttClient, mqttDataCb);
+
+	os_printf("\r\nSystem started ...\r\n");
 	system_init_done_cb(cos_check_ip);
 }
