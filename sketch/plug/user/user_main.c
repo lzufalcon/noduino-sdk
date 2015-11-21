@@ -68,15 +68,18 @@ static void ICACHE_FLASH_ATTR time_callback(void)
 				   &lan_buf_len, &akconf);
 
 	if (ret != AIRKISS_LAN_PAKE_READY) {
+#ifdef DEBUG
 		uart0_sendStr("Pack lan packet error!\r\n");
+#endif
 		return;
 	}
 	ret = espconn_sent(&ptrairudpconn, lan_buf, lan_buf_len);
 	if (ret != 0) {
 		uart0_sendStr("UDP send error!\r\n");
-
 	}
+#ifdef DEBUG
 	uart0_sendStr("Finish send notify!\r\n");
+#endif
 }
 
 void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
@@ -103,6 +106,8 @@ void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned shor
 
 		if (packret != 0) {
 			uart0_sendStr("LAN UDP Send err!\r\n");
+		} else {
+			airkiss_nff_stop();
 		}
 		break;
 	default:
@@ -176,8 +181,8 @@ void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
 	os_printf("MQTT: Connected\r\n");
-	MQTT_Subscribe(client, "/app2dev/gh_95fae", 0);
-	MQTT_Publish(client, "/dev2app/gh_95fae", "hello0", 6, 0, 0);
+	MQTT_Subscribe(client, "/app2dev/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", 0);
+	//MQTT_Publish(client, "/dev2app/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", "online", 6, 0, 0);
 }
 
 void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
@@ -231,7 +236,7 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 	} else {
 		// idle or connecting
 		os_timer_setfn(&client_timer, (os_timer_func_t *)cos_check_ip, NULL);
-		os_timer_arm(&client_timer, 100, 0);
+		os_timer_arm(&client_timer, 150, 0);
 
 		if (check_ip_count++ > 50) {
 			// delay 10s, need to start airkiss to reconfig the network
