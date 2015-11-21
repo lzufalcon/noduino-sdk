@@ -12,7 +12,7 @@ It's based on Espressif SDK 1.4.0
 
 ### Quick Start
 
-- NodeMCU v1.0 board / Noduino Falcon board
+- Noduino Falcon board / NodeMCU v1.0 board
 - Git
 
 ```bash
