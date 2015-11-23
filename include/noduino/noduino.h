@@ -24,6 +24,8 @@
 extern "C" {
 #endif
 
+#include "osapi.h"
+
 //#include <stdlib.h>
 //#include <stdint.h>
 //#include <stdbool.h>

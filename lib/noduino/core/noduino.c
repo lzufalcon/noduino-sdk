@@ -194,7 +194,7 @@ void ICACHE_FLASH_ATTR user_init(void)
 	struct rst_info *rtc_info_ptr = system_get_rst_info();
 	memcpy((void *)&resetInfo, (void *)rtc_info_ptr, sizeof(resetInfo));
 
-	//uart_div_modify(0, UART_CLK_FREQ / (115200));
+	uart_div_modify(0, UART_CLK_FREQ / (115200));
 
 	init();
 
