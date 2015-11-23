@@ -47,6 +47,9 @@ uint16_t lan_buf_len;
 #define DEVICE_ID			"gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47"
 #define DEFAULT_LAN_PORT	12476
 
+char mqtt_uname[] = DEVICE_ID;
+char mqtt_pass[] = "123456";
+
 const airkiss_config_t akconf = {
 	(airkiss_memset_fn) & memset,
 	(airkiss_memcpy_fn) & memcpy,
@@ -80,6 +83,11 @@ static void ICACHE_FLASH_ATTR time_callback(void)
 #ifdef DEBUG
 	uart0_sendStr("Finish send notify!\r\n");
 #endif
+}
+
+void ICACHE_FLASH_ATTR airkiss_nff_stop(void)
+{
+	os_timer_disarm(&time_serv);
 }
 
 void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
@@ -127,11 +135,6 @@ void ICACHE_FLASH_ATTR airkiss_nff_start(void)
 
 	os_timer_setfn(&time_serv, (os_timer_func_t *) time_callback, NULL);
 	os_timer_arm(&time_serv, 5000, 1);	//5s定时器
-}
-
-void ICACHE_FLASH_ATTR airkiss_nff_stop(void)
-{
-	os_timer_disarm(&time_serv);
 }
 
 void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
@@ -182,7 +185,7 @@ void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 	MQTT_Client* client = (MQTT_Client*)args;
 	os_printf("MQTT: Connected\r\n");
 	MQTT_Subscribe(client, "/app2dev/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", 0);
-	//MQTT_Publish(client, "/dev2app/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", "online", 6, 0, 0);
+	MQTT_Publish(client, "/dev2app/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", "online", 6, 0, 0);
 }
 
 void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
@@ -231,6 +234,7 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 		// cloud return the bind state
 
 		// start broadcast airkiss-nff udp pkg
+		// TODO: need to check the binding state
 		airkiss_nff_start();
 		MQTT_Connect(&mqttClient);
 	} else {
@@ -260,7 +264,7 @@ void ICACHE_FLASH_ATTR user_init(void)
 #endif
 
 	MQTT_InitConnection(&mqttClient, "101.200.202.247", 1883, 0);
-	MQTT_InitClient(&mqttClient, "noduino_falcon", "", "", 120, 1);
+	MQTT_InitClient(&mqttClient, "noduino_falcon", mqtt_uname, mqtt_pass, 120, 1);
 
 	//MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
 
