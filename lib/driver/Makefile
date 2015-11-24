@@ -47,7 +47,7 @@ sinclude $(PDIR)/Makefile
 LIB_INCDIR	:= ../../include/driver
 
 install: all
-	@mv .output/lib/*.a ../ 
-	@rm -f $(LIB_INCDIR)/*
-	@mkdir -p $(LIB_INCDIR)
-	@cp -a include/driver/* $(LIB_INCDIR)/
+	mv .output/lib/*.a ../ 
+	rm -f $(LIB_INCDIR)/*
+	mkdir -p $(LIB_INCDIR)
+	cp -a include/driver/* $(LIB_INCDIR)/
