@@ -12,7 +12,7 @@
 #
 
 ifndef PDIR
-GEN_LIBS = libdh21.a
+GEN_LIBS = libdht21.a
 endif
 
 # noduino sdk base dir

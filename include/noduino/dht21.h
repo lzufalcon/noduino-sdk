@@ -1,5 +1,6 @@
 /*
  *  Copyright (c) 2015 - 2025 MaiKe Labs
+ *  Library for DHT21/AM2301 digital temperature sensor
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -15,33 +16,28 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 */
+
+#ifndef __DHT21_H__
+#define __DHT21_H__
+
 #include "noduino.h"
-#include "dh21.h"
 
-DH21 dh21(D1);
+class DHT21 {
+ public:
+	DHT21(int pin);
+	float temperature();
+	float humidity();
+	char read();
+	char data_check();
+	void set_pin(int p);
 
-void ICACHE_FLASH_ATTR
-setup()
-{
-	uart_init(BIT_RATE_115200, BIT_RATE_115200);
-}
-
-void ICACHE_FLASH_ATTR
-loop()
-{
-	char buf[128];
-	char t[8];
-    char h[8];
-	memset(t, 0, 8);
-	memset(h, 0, 8);
-
-	if(dh21.read() == -1) {
-		uart0_sendStr("Read sensor error\n");
-	} else {
-		dtostrf(dh21.temperature(), 5, 2, t);
-		dtostrf(dh21.humidity(), 5, 2, h);
-		sprintf(buf, "Temp: %sC, Humi: %s%\n", t, h);
-		uart0_sendStr(buf);
-	}
-	delay(2000);
-}
+ private:
+	char read_8bits();
+	int _pin;
+	char RH_H;
+	char RH_L;
+	char T_H;
+	char T_L;
+	char crc;
+};
+#endif

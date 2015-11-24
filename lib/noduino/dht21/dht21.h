@@ -1,6 +1,6 @@
 /*
  *  Copyright (c) 2015 - 2025 MaiKe Labs
- *  Library for DH21/AM2301 digital temperature sensor
+ *  Library for DHT21/AM2301 digital temperature sensor
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
  *
 */
 
-#ifndef __DH21_H__
-#define __DH21_H__
+#ifndef __DHT21_H__
+#define __DHT21_H__
 
 #include "noduino.h"
 
-class DH21 {
+class DHT21 {
  public:
-	DH21(int pin);
+	DHT21(int pin);
 	float temperature();
 	float humidity();
 	char read();

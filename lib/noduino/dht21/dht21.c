@@ -1,6 +1,6 @@
 /*
  *  Copyright (c) 2015 - 2025 MaiKe Labs
- *  Library for DH21/AM2301 digital temperature sensor
+ *  Library for DHT21/AM2301 digital temperature sensor
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -17,21 +17,21 @@
  *
 */
 
-#include "dh21.h"
+#include "dht21.h"
 
-DH21::DH21(int p)
+DHT21::DHT21(int p)
 {
 	_pin = p;
 	pinMode(_pin, OUTPUT);
 	digitalWrite(_pin, HIGH);
 }
 
-void DH21::set_pin(int p)
+void DHT21::set_pin(int p)
 {
 	_pin = p;
 }
 
-char DH21::read()
+char DHT21::read()
 {
 	char flag;
 	pinMode(_pin, OUTPUT);
@@ -65,7 +65,7 @@ char DH21::read()
 		return -1;
 }
 
-char DH21::read_8bits()
+char DHT21::read_8bits()
 {
 	char i, flag, data = 0;
 	char temp;
@@ -86,7 +86,7 @@ char DH21::read_8bits()
 	return data;
 }
 
-char DH21::data_check()
+char DHT21::data_check()
 {
 	char tmp = (T_H + T_L + RH_H + RH_L);
 	if (tmp != crc) {
@@ -99,7 +99,7 @@ char DH21::data_check()
 		return 0;
 }
 
-float DH21::temperature()
+float DHT21::temperature()
 {
 	uint16_t T = (T_H << 8) | T_L;
 	float tt;
@@ -117,7 +117,7 @@ float DH21::temperature()
 	return tt;
 }
 
-float DH21::humidity()
+float DHT21::humidity()
 {
 	uint16_t RH = (uint16_t) (RH_H << 8) | RH_L;
 	float hum;
