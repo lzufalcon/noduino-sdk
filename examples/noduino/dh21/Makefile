@@ -21,7 +21,8 @@ TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
 # paths from the SDK used in this project
 SDK_INCDIR	= include include/driver include/noduino
-SDK_LIBDIR = lib
+SDK_LIBDIR	= lib
+SDK_LDDIR	= ld
 
 # various paths from the ESPSDK used in this project
 ESPSDK_INCDIR	= include include/json
@@ -67,7 +68,7 @@ CFLAGS		= -c -Os -g -mlongcalls -mtext-section-literals -fno-exceptions -fno-rtt
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
 
 # linker script used for the above linkier step
-LD_SCRIPT	= eagle.app.v6.ld
+LD_SCRIPT	= eagle.app.v6.4096.ld
 
 # we create two different files for uploading into the flash
 # these are the names and options to generate them
@@ -87,7 +88,7 @@ SDK_LIBDIR		:= $(addprefix -L$(SDK_BASE)/,$(SDK_LIBDIR))
 
 ESPSDK_INCDIR	:= $(addprefix -I$(ESPSDK_BASE)/,$(ESPSDK_INCDIR))
 ESPSDK_LIBDIR	:= $(addprefix -L$(ESPSDK_BASE)/,$(ESPSDK_LIBDIR))
-LD_SCRIPT		:= $(addprefix -T$(ESPSDK_BASE)/$(ESPSDK_LDDIR)/,$(LD_SCRIPT))
+LD_SCRIPT		:= $(addprefix -T$(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT))
 
 INCDIR			:= $(addprefix -I,$(SRC_DIR))
 MODULE_INCDIR	:= -I include

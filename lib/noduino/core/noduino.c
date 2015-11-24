@@ -68,10 +68,8 @@ void preloop_update_frequency()
 #endif
 }
 
-#if 0
 extern void (*__init_array_start) (void);
 extern void (*__init_array_end) (void);
-#endif
 
 cont_t g_cont __attribute__ ((aligned(16)));
 static os_event_t g_loop_queue[LOOP_QUEUE_SIZE];
@@ -157,14 +155,12 @@ static void loop_task(os_event_t * events)
 	}
 }
 
-#if 0
-static void do_global_ctors(void)
+static void ICACHE_FLASH_ATTR do_global_ctors(void)
 {
 	void (**p) (void);
 	for (p = &__init_array_start; p != &__init_array_end; ++p)
 		(*p) ();
 }
-#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -178,11 +174,11 @@ extern "C"
 #endif
 void gdb_init(void) __attribute__ ((weak, alias("__gdb_init")));
 
-void init_done()
+void ICACHE_FLASH_ATTR init_done()
 {
 	//system_set_os_print(1);
 	//gdb_init();
-	//do_global_ctors();
+	do_global_ctors();
 	esp_schedule();
 }
 
