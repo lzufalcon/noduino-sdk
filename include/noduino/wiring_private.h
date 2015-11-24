@@ -25,9 +25,6 @@
 #ifndef WiringPrivate_h
 #define WiringPrivate_h
 
-//#include <stdio.h>
-//#include <stdarg.h>
-
 #include "noduino.h"
 
 #ifdef __cplusplus
