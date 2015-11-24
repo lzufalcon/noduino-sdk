@@ -36,15 +36,10 @@ extern "C" {
 #include <limits.h>
 #include <errno.h>
 
-#include <stdio.h>
-//#include <stdlib.h>
-//#include <stdint.h>
-//#include <stdbool.h>
-//#include <stddef.h>
-#include <string.h>
-#include <math.h>
-
+// implement common libc-like function
+#include "libc_replacements.h"
 #include "stdlib_noniso.h"
+
 #include "esp8266_peri.h"
 //#include "binary.h"
 //#include "twi.h"
