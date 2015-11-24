@@ -56,8 +56,8 @@ void initVariant()
 {
 }
 
-extern void loop();
-extern void setup();
+extern void ICACHE_FLASH_ATTR loop();
+extern void ICACHE_FLASH_ATTR setup();
 
 void preloop_update_frequency() __attribute__ ((weak));
 void preloop_update_frequency()

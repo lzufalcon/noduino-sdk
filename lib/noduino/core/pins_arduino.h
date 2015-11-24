@@ -42,24 +42,21 @@ static const uint8_t MOSI  = 13;
 static const uint8_t MISO  = 12;
 static const uint8_t SCK   = 14;
 
-static const uint8_t BUILTIN_LED = 2;
+static const uint8_t BUILTIN_LED = 16;
 
 static const uint8_t A0 = 17;
 
-static const uint8_t D0   = 3;
-static const uint8_t D1   = 1;
-static const uint8_t D2   = 2;
-static const uint8_t D3   = 16;
-static const uint8_t D4   = 4;
-static const uint8_t D5   = 5;
-static const uint8_t D6   = 0;
-static const uint8_t D7   = 8;
-static const uint8_t D8   = 7;
-static const uint8_t D9   = 6;
-static const uint8_t D10  = 15;
-static const uint8_t D11  = 13;
-static const uint8_t D12  = 12;
-static const uint8_t D13  = 14;
+static const uint8_t D0   = 16;
+static const uint8_t D1   = 5;
+static const uint8_t D2   = 4;
+static const uint8_t D3   = 0;
+static const uint8_t D4   = 2;
+static const uint8_t D5   = 14;
+static const uint8_t D6   = 12;
+static const uint8_t D7   = 13;
+static const uint8_t D8   = 15;
+static const uint8_t D9   = 3;
+static const uint8_t D10  = 1;
 
 // These serial port names are intended to allow libraries and architecture-neutral
 // sketches to automatically default to the correct port name for a particular type

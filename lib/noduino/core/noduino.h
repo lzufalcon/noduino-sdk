@@ -25,19 +25,28 @@ extern "C" {
 #endif
 
 #include "osapi.h"
+#include "user_interface.h"
+#include "ets_sys.h"
+#include "os_type.h"
+#include "mem.h"
 
+#include "driver/uart.h"
+
+#include <stdarg.h>
+#include <limits.h>
+#include <errno.h>
+
+#include <stdio.h>
 //#include <stdlib.h>
 //#include <stdint.h>
 //#include <stdbool.h>
 //#include <stddef.h>
-//#include <stdarg.h>
-//#include <stdio.h>
-//#include <string.h>
-//#include <math.h>
+#include <string.h>
+#include <math.h>
 
-//#include "stdlib_noniso.h"
+#include "stdlib_noniso.h"
+#include "esp8266_peri.h"
 //#include "binary.h"
-#include "peri.h"
 //#include "twi.h"
 
 #define HIGH 0x1
@@ -241,15 +250,15 @@ void optimistic_yield(uint32_t interval_us);
 
 #ifdef __cplusplus
 
-#include "pgmspace.h"
+//#include "pgmspace.h"
 
-#include "WCharacter.h"
-#include "WString.h"
+//#include "WCharacter.h"
+//#include "WString.h"
 
-#include "HardwareSerial.h"
-#include "Esp.h"
-#include "Updater.h"
-#include "debug.h"
+//#include "HardwareSerial.h"
+//#include "Esp.h"
+//#include "Updater.h"
+//#include "debug.h"
 
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -272,9 +281,6 @@ long random(long);
 long random(long, long);
 void randomSeed(unsigned long);
 long map(long, long, long, long, long);
-
-extern "C" void configTime(long timezone, int daylightOffset_sec,
-    const char* server1, const char* server2 = nullptr, const char* server3 = nullptr);
 
 #endif
 
