@@ -23,25 +23,21 @@ DHT21 dht21(D1);
 void ICACHE_FLASH_ATTR
 setup()
 {
-	uart_init(BIT_RATE_115200, BIT_RATE_115200);
+	serial_begin(115200);
 }
 
 void ICACHE_FLASH_ATTR
 loop()
 {
-	char buf[128];
-	char t[8];
-    char h[8];
-	memset(t, 0, 8);
-	memset(h, 0, 8);
+    char t_buf[8];
+    char h_buf[8];
 
 	if(dht21.read() == -1) {
-		uart0_sendStr("Read sensor error\n");
+		serial_printf("Read sensor error\n");
 	} else {
-		dtostrf(dht21.temperature(), 5, 2, t);
-		dtostrf(dht21.humidity(), 5, 2, h);
-		sprintf(buf, "Temp: %sC, Humi: %s%\n", t, h);
-		uart0_sendStr(buf);
+		serial_printf("Temp: %sC, Humi: %s%\n",
+			dtostrf(dht21.temperature(), 5, 2, t_buf),
+			dtostrf(dht21.humidity(), 5, 2, h_buf));
 	}
 	delay(2000);
 }

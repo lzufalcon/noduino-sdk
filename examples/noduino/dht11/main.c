@@ -25,27 +25,23 @@ void setup()
 
 void loop()
 {
-	char buf[128];
-	char t[8];
-	char h[8];
-	memset(t, 0, 8);
-	memset(h, 0, 8);
+	char t_buf[8];
+	char h_buf[8];
 
 	switch (dht11_read(D1)) {
 		case DHT11_OK:
-			dtostrf(dht11_temperature(), 5, 2, t);
-			dtostrf(dht11_humidity(), 5, 2, h);
-			sprintf(buf, "Temp: %sC, Humi: %s%\n", t, h);
-			serial_print(buf);
+			serial_printf("Temp: %sC, Humi: %s%\n",
+				dtostrf(dht11_temperature(), 5, 2, t_buf),
+				dtostrf(dht11_humidity(), 5, 2, h_buf));
 			break;
 		case DHT11_ERROR_CHECKSUM:
-			serial_print("Checksum error\n");
+			serial_printf("Checksum error\n");
 			break;
 		case DHT11_ERROR_TIMEOUT:
-			serial_print("Timeout error\n");
+			serial_printf("Timeout error\n");
 			break;
 		default:
-			serial_print("Unknown error\n");
+			serial_printf("Unknown error\n");
 			break;
 	}
 
