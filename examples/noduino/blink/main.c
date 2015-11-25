@@ -17,17 +17,19 @@
 */
 #include "noduino.h"
 
+// the blue led, gpio 2
+int LED = 2;
+
 void setup()
 {
-	// the blue led, gpio 2
-	pinMode(2, OUTPUT);
-	digitalWrite(2, LOW);
+	pinMode(LED, OUTPUT);		// set gpio2 to output mode
+	digitalWrite(LED, LOW);
 }
 
 void loop()
 {
-	delay(1000);
-	digitalWrite(2, HIGH);
-	delay(1000);
-	digitalWrite(2, LOW);
+	digitalWrite(LED, HIGH);	// light on
+	delay(1000);				// delay 1000ms
+	digitalWrite(LED, LOW);		// light off
+	delay(1000);				// delay 1000ms
 }
