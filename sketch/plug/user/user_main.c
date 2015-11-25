@@ -22,6 +22,7 @@
 #include "espconn.h"
 #include "os_type.h"
 #include "mem.h"
+#include "gpio.h"
 
 #include "driver/uart.h"
 #include "airkiss.h"
@@ -214,6 +215,17 @@ void ICACHE_FLASH_ATTR mqttDataCb (uint32_t *args, const char* topic,
 	os_memcpy(dataBuf, data, data_len);
 	dataBuf[data_len] = 0;
 
+	if(os_strncmp(dataBuf, "on", 2) == 0)
+	{
+		os_printf("set gpio2 to high\n");
+		gpio_output_set(0, BIT2, BIT2, 0);
+	}
+	if(os_strncmp(dataBuf, "off", 3) == 0)
+	{
+		os_printf("set gpio2 to low\n");
+		gpio_output_set(BIT2, 0, BIT2, 0);
+	}
+
 	os_printf("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
 	os_free(topicBuf);
 	os_free(dataBuf);
@@ -262,6 +274,19 @@ void ICACHE_FLASH_ATTR user_init(void)
 #ifdef DEBUG
 	uart_init(115200, 115200);
 #endif
+
+	//Initialize the GPIO subsystem.
+	gpio_init();
+
+	//Set GPIO2 to output mode
+	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+
+	//Set GPIO12 to output mode
+	//PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12);
+
+	//Set GPIO2 low
+	//GPIO_OUTPUT_SET(2, 0);
+	gpio_output_set(BIT2, 0, BIT2, 0);
 
 	MQTT_InitConnection(&mqttClient, "101.200.202.247", 1883, 0);
 	MQTT_InitClient(&mqttClient, "noduino_falcon", mqtt_uname, mqtt_pass, 120, 1);
