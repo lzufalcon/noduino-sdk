@@ -176,7 +176,7 @@ void gdb_init(void) __attribute__ ((weak, alias("__gdb_init")));
 
 void ICACHE_FLASH_ATTR init_done()
 {
-	//system_set_os_print(1);
+	system_set_os_print(1);
 	//gdb_init();
 	do_global_ctors();
 	esp_schedule();

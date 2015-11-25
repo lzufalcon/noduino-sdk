@@ -30,7 +30,7 @@ extern "C" {
 #include "os_type.h"
 #include "mem.h"
 
-#include "driver/uart.h"
+//#include "driver/uart.h"
 
 #include <stdarg.h>
 #include <limits.h>
@@ -39,6 +39,8 @@ extern "C" {
 // implement common libc-like function
 #include "libc_replacements.h"
 #include "stdlib_noniso.h"
+
+#include "serial.h"
 
 #include "esp8266_peri.h"
 //#include "binary.h"
@@ -250,7 +252,6 @@ void optimistic_yield(uint32_t interval_us);
 //#include "WCharacter.h"
 //#include "WString.h"
 
-//#include "HardwareSerial.h"
 //#include "Esp.h"
 //#include "Updater.h"
 //#include "debug.h"
