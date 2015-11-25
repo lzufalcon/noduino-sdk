@@ -1,4 +1,4 @@
-Noduino SDK - Smart Light Reference Design
+Noduino SDK - Smart Plug Reference Design
 ===========================================
 
 

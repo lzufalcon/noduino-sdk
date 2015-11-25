@@ -22,6 +22,7 @@
 #include "espconn.h"
 #include "os_type.h"
 #include "mem.h"
+#include "gpio.h"
 
 #include "driver/uart.h"
 #include "airkiss.h"
@@ -47,6 +48,9 @@ uint16_t lan_buf_len;
 #define DEVICE_ID			"gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47"
 #define DEFAULT_LAN_PORT	12476
 
+char mqtt_uname[] = DEVICE_ID;
+char mqtt_pass[] = "123456";
+
 const airkiss_config_t akconf = {
 	(airkiss_memset_fn) & memset,
 	(airkiss_memcpy_fn) & memcpy,
@@ -68,15 +72,23 @@ static void ICACHE_FLASH_ATTR time_callback(void)
 				   &lan_buf_len, &akconf);
 
 	if (ret != AIRKISS_LAN_PAKE_READY) {
+#ifdef DEBUG
 		uart0_sendStr("Pack lan packet error!\r\n");
+#endif
 		return;
 	}
 	ret = espconn_sent(&ptrairudpconn, lan_buf, lan_buf_len);
 	if (ret != 0) {
 		uart0_sendStr("UDP send error!\r\n");
-
 	}
+#ifdef DEBUG
 	uart0_sendStr("Finish send notify!\r\n");
+#endif
+}
+
+void ICACHE_FLASH_ATTR airkiss_nff_stop(void)
+{
+	os_timer_disarm(&time_serv);
 }
 
 void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
@@ -103,6 +115,8 @@ void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned shor
 
 		if (packret != 0) {
 			uart0_sendStr("LAN UDP Send err!\r\n");
+		} else {
+			airkiss_nff_stop();
 		}
 		break;
 	default:
@@ -122,11 +136,6 @@ void ICACHE_FLASH_ATTR airkiss_nff_start(void)
 
 	os_timer_setfn(&time_serv, (os_timer_func_t *) time_callback, NULL);
 	os_timer_arm(&time_serv, 5000, 1);	//5s定时器
-}
-
-void ICACHE_FLASH_ATTR airkiss_nff_stop(void)
-{
-	os_timer_disarm(&time_serv);
 }
 
 void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
@@ -176,8 +185,8 @@ void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
 	os_printf("MQTT: Connected\r\n");
-	MQTT_Subscribe(client, "/app2dev/gh_95fae", 0);
-	MQTT_Publish(client, "/dev2app/gh_95fae", "hello0", 6, 0, 0);
+	MQTT_Subscribe(client, "/app2dev/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", 0);
+	MQTT_Publish(client, "/dev2app/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", "online", 6, 0, 0);
 }
 
 void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
@@ -206,6 +215,17 @@ void ICACHE_FLASH_ATTR mqttDataCb (uint32_t *args, const char* topic,
 	os_memcpy(dataBuf, data, data_len);
 	dataBuf[data_len] = 0;
 
+	if(os_strncmp(dataBuf, "on", 2) == 0)
+	{
+		os_printf("set gpio2 to high\n");
+		gpio_output_set(0, BIT2, BIT2, 0);
+	}
+	if(os_strncmp(dataBuf, "off", 3) == 0)
+	{
+		os_printf("set gpio2 to low\n");
+		gpio_output_set(BIT2, 0, BIT2, 0);
+	}
+
 	os_printf("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
 	os_free(topicBuf);
 	os_free(dataBuf);
@@ -226,12 +246,13 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 		// cloud return the bind state
 
 		// start broadcast airkiss-nff udp pkg
+		// TODO: need to check the binding state
 		airkiss_nff_start();
 		MQTT_Connect(&mqttClient);
 	} else {
 		// idle or connecting
 		os_timer_setfn(&client_timer, (os_timer_func_t *)cos_check_ip, NULL);
-		os_timer_arm(&client_timer, 100, 0);
+		os_timer_arm(&client_timer, 150, 0);
 
 		if (check_ip_count++ > 50) {
 			// delay 10s, need to start airkiss to reconfig the network
@@ -254,8 +275,21 @@ void ICACHE_FLASH_ATTR user_init(void)
 	uart_init(115200, 115200);
 #endif
 
+	//Initialize the GPIO subsystem.
+	gpio_init();
+
+	//Set GPIO2 to output mode
+	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+
+	//Set GPIO12 to output mode
+	//PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12);
+
+	//Set GPIO2 low
+	//GPIO_OUTPUT_SET(2, 0);
+	gpio_output_set(BIT2, 0, BIT2, 0);
+
 	MQTT_InitConnection(&mqttClient, "101.200.202.247", 1883, 0);
-	MQTT_InitClient(&mqttClient, "noduino_falcon", "", "", 120, 1);
+	MQTT_InitClient(&mqttClient, "noduino_falcon", mqtt_uname, mqtt_pass, 120, 1);
 
 	//MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
 
