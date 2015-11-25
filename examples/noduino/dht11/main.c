@@ -18,9 +18,9 @@
 #include "noduino.h"
 #include "dht11.h"
 
-void  setup()
+void setup()
 {
-	uart_init(115200, 115200);
+	serial_begin(115200);
 }
 
 void loop()
@@ -36,16 +36,16 @@ void loop()
 			dtostrf(dht11_temperature(), 5, 2, t);
 			dtostrf(dht11_humidity(), 5, 2, h);
 			sprintf(buf, "Temp: %sC, Humi: %s%\n", t, h);
-			uart0_sendStr(buf);
+			serial_print(buf);
 			break;
 		case DHT11_ERROR_CHECKSUM:
-			uart0_sendStr("Checksum error\n");
+			serial_print("Checksum error\n");
 			break;
 		case DHT11_ERROR_TIMEOUT:
-			uart0_sendStr("Timeout error\n");
+			serial_print("Timeout error\n");
 			break;
 		default:
-			uart0_sendStr("Unknown error\n");
+			serial_print("Unknown error\n");
 			break;
 	}
 
