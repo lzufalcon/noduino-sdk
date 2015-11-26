@@ -282,12 +282,12 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 			if(!smartconfig_started)
 			{
 				wifi_set_opmode(STATION_MODE);
-				smartconfig_set_type(SC_TYPE_ESPTOUCH_AIRKISS);
-				esptouch_set_timeout(200);
+				smartconfig_set_type(SC_TYPE_AIRKISS);
+				// esptouch_set_timeout(200);
 #if defined(ESPTOUCH_DEBUG)
 				smartconfig_start(smartconfig_done, 1);
 #else
-				smartconfig_start(smartconfig_done);
+				smartconfig_start(smartconfig_done, 1);
 #endif
 				// set smartconfig flag to prevent start again
 				smartconfig_started = true;
