@@ -110,6 +110,8 @@ void wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
 
 		if (packret != 0) {
 			uart0_sendStr("LAN UDP Send err!\r\n");
+		} else {
+			// close the udp 12476
 		}
 		break;
 	default:

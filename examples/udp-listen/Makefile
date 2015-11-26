@@ -1,8 +1,6 @@
 #
 # Copyright (c) 2015 MaiKe Labs
 #
-# Based on official ESPSDK and source-code-examples project
-#
 #
 
 # name for the target project
@@ -21,7 +19,7 @@ TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
 # paths from the SDK used in this project
 SDK_INCDIR	= include include/driver
-SDK_LIBDIR = lib lib/driver
+SDK_LIBDIR = lib
 
 # various paths from the ESPSDK used in this project
 ESPSDK_INCDIR	= include include/json
@@ -29,13 +27,27 @@ ESPSDK_LIBDIR	= lib
 ESPSDK_LDDIR	= ld
 
 # libraries used in this project, mainly provided by the ESPSDK
-LIBS		:= c gcc
+LIBS		:= gcc
 LIBS		+= crypto espnow json lwip_536 lwip mesh net80211 phy pp pwm smartconfig ssl upgrade wpa wps main
-LIBS		+= driver
+LIBS		+= driver airkiss mqtt
 
 # esptool path and port
-ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
-ESPPORT		?= /dev/ttyUSB0
+ifeq ($(OS),Windows_NT)
+	ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool.exe
+	FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool.exe
+	ESPPORT		?= COM3
+else
+	ESPTOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
+	FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
+
+	UNAME_S		:= $(shell uname -s)
+	ifeq ($(UNAME_S),Darwin)
+		ESPPORT		?= /dev/cu.SLAB_USBtoUART
+	endif
+	ifeq ($(UNAME_S),Linux)
+		ESPPORT		?= /dev/ttyUSB0
+	endif
+endif
 
 # firmware generating tool
 FW_TOOL		?= $(TOOLCHAIN_DIR)/bin/esptool
@@ -46,13 +58,13 @@ AR		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar
 LD		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
+CFLAGS		= -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
 
 # linker flags used to generate the main object file
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
 
 # linker script used for the above linkier step
-LD_SCRIPT	= eagle.app.v6.ld
+LD_SCRIPT	= eagle.app.v6.4096.ld
 
 # we create two different files for uploading into the flash
 # these are the names and options to generate them
@@ -131,8 +143,11 @@ $(BUILD_BASE):
 firmware:
 	$(Q) mkdir -p $@
 
-flash: $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
+flash: all $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
 	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x00000 -cf $(FW_BASE)/0x00000.bin -ca 0x40000 -cf $(FW_BASE)/0x40000.bin
+
+zero:
+	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x3FE000 -cf $(ESPSDK_BASE)/bin/blank.bin
 
 clean:
 	$(Q) rm -f $(APP_AR)

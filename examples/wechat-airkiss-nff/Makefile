@@ -13,7 +13,7 @@ BUILD_DIR	= build
 FW_BASE		= build
 
 # base directory of the SDK package, absolute
-SDK_BASE		?= ../..
+SDK_BASE		?= ../../
 ESPSDK_BASE		?= $(SDK_BASE)/sdk
 TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
@@ -27,9 +27,9 @@ ESPSDK_LIBDIR	= lib
 ESPSDK_LDDIR	= ld
 
 # libraries used in this project, mainly provided by the ESPSDK
-LIBS		:= c gcc
+LIBS		:= gcc
 LIBS		+= crypto espnow json lwip_536 lwip mesh net80211 phy pp pwm smartconfig ssl upgrade wpa wps main
-LIBS		+= driver airkiss
+LIBS		+= driver airkiss mqtt
 
 # esptool path and port
 ifeq ($(OS),Windows_NT)
@@ -58,13 +58,13 @@ AR		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar
 LD		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc
 
 # compiler flags using during compilation of source files
-CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
+CFLAGS		= -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
 
 # linker flags used to generate the main object file
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
 
 # linker script used for the above linkier step
-LD_SCRIPT	= eagle.app.v6.ld
+LD_SCRIPT	= eagle.app.v6.4096.ld
 
 # we create two different files for uploading into the flash
 # these are the names and options to generate them
@@ -145,6 +145,9 @@ firmware:
 
 flash: all $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
 	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x00000 -cf $(FW_BASE)/0x00000.bin -ca 0x40000 -cf $(FW_BASE)/0x40000.bin
+
+zero:
+	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x3FE000 -cf $(ESPSDK_BASE)/bin/blank.bin
 
 clean:
 	$(Q) rm -f $(APP_AR)
