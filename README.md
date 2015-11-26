@@ -28,7 +28,7 @@ $ ./gen.py
 # generate the toolchain (you need Python 2.7)
 
 # try the first example
-$ cd ../example/blink
+$ cd ../example/noduino/blink
 $ make
 
 # upload the example to dev board through serial
@@ -36,3 +36,8 @@ $ make flash
 ```
 
 You can try other cool examples in example directory
+
+### Reference
+
+* [Noduino](http://noduino.org)
+* [ESP8266 WIKI](http://wiki.jackslab.org/ESP8266)
