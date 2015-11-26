@@ -18,7 +18,7 @@ ESPSDK_BASE		?= $(SDK_BASE)/sdk
 TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
 # paths from the SDK used in this project
-SDK_INCDIR	= include include/driver
+SDK_INCDIR	= include include/driver include/noduino
 SDK_LIBDIR = lib
 
 # various paths from the ESPSDK used in this project

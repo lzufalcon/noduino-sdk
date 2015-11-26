@@ -18,17 +18,37 @@
 #include "osapi.h"
 #include "os_type.h"
 #include "gpio.h"
+#include "noduino.h"
 
 static volatile os_timer_t blink_timer;
+
+void gpio16_output()
+{
+	GPF16 = GP16FFS(GPFFS_GPIO(16));	//Set mode to GPIO
+	GPC16 = 0;
+	GP16E |= 1;
+}
+
+void gpio16_high()
+{
+	GP16O |= 1;
+}
+
+void gpio16_low()
+{
+	GP16O &= ~1;
+}
 
 void blink_timerfunc(void *arg)
 {
 	if (GPIO_INPUT_GET(2)) {
 		//Current is HIGH, Set GPIO2 to LOW
 		gpio_output_set(0, BIT2, BIT2, 0);
+		gpio16_high();
 	} else {
 		//Current is LOW, Set GPIO2 to HIGH
 		gpio_output_set(BIT2, 0, BIT2, 0);
+		gpio16_low();
 	}
 }
 
@@ -41,7 +61,12 @@ void ICACHE_FLASH_ATTR user_init()
 	//Set GPIO2 to output mode
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
 
-	//Set GPIO2 low
+	//gpio16 output
+	gpio16_output();
+	gpio16_high();
+
+	// Set GPIO2 high to disable the blue led
+	// gpio2 low ---> blue led on
 	gpio_output_set(0, BIT2, BIT2, 0);
 
 	//Disable the timer
