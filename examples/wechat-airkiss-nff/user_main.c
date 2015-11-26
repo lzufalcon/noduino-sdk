@@ -188,6 +188,8 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 {
 	struct ip_info ipconfig;
 
+	static bool smartconfig_started = false;
+
 	os_timer_disarm(&client_timer);
 
 	wifi_get_ip_info(STATION_IF, &ipconfig);
@@ -200,6 +202,7 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 
 		// start broadcast airkiss-nff udp pkg
 		airkiss_nff_start();
+		smartconfig_started = false;
 	} else {
 		// idle or connecting
 		os_timer_setfn(&client_timer, (os_timer_func_t *)cos_check_ip, NULL);
@@ -208,10 +211,14 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 		if (check_ip_count++ > 50) {
 			// delay 10s, need to start airkiss to reconfig the network
 			// TODO: flash led to show wifi disconnect
-			smartconfig_set_type(SC_TYPE_AIRKISS);
-			wifi_set_opmode(STATION_MODE);
-			smartconfig_start(smartconfig_done);
-
+			if(!smartconfig_started)
+			{
+				smartconfig_set_type(SC_TYPE_AIRKISS);
+				wifi_set_opmode(STATION_MODE);
+				smartconfig_start(smartconfig_done);
+				// set smartconfig flag to prevent start again
+				smartconfig_started = true;
+			}
 			// reset the count
 			check_ip_count = 0;
 		}
