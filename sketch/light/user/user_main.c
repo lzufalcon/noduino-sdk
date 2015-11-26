@@ -24,7 +24,7 @@
 #include "mem.h"
 #include "gpio.h"
 
-#include "esp8266_peri.h"
+#include "noduino/esp8266_peri.h"
 #include "driver/uart.h"
 #include "airkiss.h"
 #include "smartconfig.h"
