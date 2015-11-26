@@ -281,9 +281,14 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 			// TODO: flash led to show wifi disconnect
 			if(!smartconfig_started)
 			{
-				smartconfig_set_type(SC_TYPE_AIRKISS);
 				wifi_set_opmode(STATION_MODE);
+				smartconfig_set_type(SC_TYPE_ESPTOUCH_AIRKISS);
+				esptouch_set_timeout(200);
+#if defined(ESPTOUCH_DEBUG)
+				smartconfig_start(smartconfig_done, 1);
+#else
 				smartconfig_start(smartconfig_done);
+#endif
 				// set smartconfig flag to prevent start again
 				smartconfig_started = true;
 			}
