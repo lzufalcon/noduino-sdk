@@ -30,7 +30,7 @@ ESPSDK_LIBDIR	= lib
 ESPSDK_LDDIR	= ld
 
 # libraries used in this project, mainly provided by the ESPSDK
-LIBS		:= gcc m
+LIBS		:= gcc mirom
 LIBS		+= crypto espnow json lwip_536 lwip mesh net80211 phy pp pwm smartconfig ssl upgrade wpa wps main
 LIBS		+= noduino bmp085
 
