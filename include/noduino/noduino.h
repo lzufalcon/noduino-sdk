@@ -43,8 +43,8 @@ extern "C" {
 #include "serial.h"
 
 #include "esp8266_peri.h"
+#include "twi.h"
 //#include "binary.h"
-//#include "twi.h"
 
 #define HIGH 0x1
 #define LOW  0x0
