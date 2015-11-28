@@ -299,12 +299,12 @@ uint8_t ICACHE_FLASH_ATTR wire_endTransmission()
 	return ret;
 }
 
-uint8_t ICACHE_FLASH_ATTR wire_requestFrom(uint8_t addr, size_t len, bool sendStop)
+uint8_t ICACHE_FLASH_ATTR wire_requestFrom(uint8_t addr, size_t len)
 {
 	if(len > WIRE_BUFFER_LEN) {
 		len = WIRE_BUFFER_LEN;
 	}
-	size_t read = (twi_readFrom(addr, wire_rxBuffer, len, sendStop) == 0) ? len : 0;
+	size_t read = (twi_readFrom(addr, wire_rxBuffer, len, true) == 0) ? len : 0;
 	wire_rxBufferIndex = 0;
 	wire_rxBufferLength = read;
 	return read;

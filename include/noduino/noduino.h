@@ -35,6 +35,7 @@ extern "C" {
 #include <stdarg.h>
 #include <limits.h>
 #include <errno.h>
+#include <math.h>
 
 // implement common libc-like function
 #include "libc_replacements.h"

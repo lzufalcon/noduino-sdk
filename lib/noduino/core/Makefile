@@ -25,7 +25,7 @@ SDK_BASE := ../../..
 #   makefile at its root level - these are then overridden
 #   for a subtree within the makefile rooted therein
 #
-DEFINES += -D__ets__ -DICACHE_FLASH
+DEFINES += -D__ets__ -DICACHE_FLASH -DF_CPU=80000000
 EXTRA_CCFLAGS += -std=gnu99 -Wno-implicit-function-declaration
 
 #############################################################
