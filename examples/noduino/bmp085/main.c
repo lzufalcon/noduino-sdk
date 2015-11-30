@@ -5,8 +5,6 @@
  *  Connect GND to Ground
  *  Connect SCL to i2c clock - GPIO4
  *  Connect SDA to i2c data  - GPIO5
- *  EOC is not used, it signifies an end of conversion
- *  XCLR is a reset pin, also not used here
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -25,33 +23,38 @@
 
 #include "noduino.h"
 
-void ICACHE_FLASH_ATTR setup()
+irom void setup()
 {
-	serial_begin(9600);
+	serial_begin(115200);
+
 	if (!bmp085_begin()) {
-		serial_print("Could not find a valid BMP085 sensor, check wiring!\n");
+		serial_print("Could not find a valid BMP085 sensor,\
+						check wiring!\r\n");
+
 		while (1) {}
 	}
 }
   
-void ICACHE_FLASH_ATTR loop()
+irom void loop()
 {
-	char out_buf[7];
+	char obuf[16];
 
-	serial_printf("Temperature = %s C\n", dtostrf(bmp085_readTemperature(), 6, 2, out_buf));
-	serial_printf("Pressure = %d\n", bmp085_readPressure());
+	serial_printf("Pressure = \t\t\t%d Pa\r\n", bmp085_readPressure());
+
+	dtostrf(bmp085_readTemperature(), 16, 2, obuf);
+	serial_printf("Temperature = \t\t%s C\r\n", obuf);
 
 	// Calculate altitude assuming 'standard' barometric
 	// pressure of 1013.25 millibar = 101325 Pascal
-	serial_printf("Altitude = %s M\n", dtostrf(bmp085_readAltitude(), 6, 2, out_buf));
-	serial_printf("Pressure at sealevel (calculated) = %d Pa\n",
-			bmp085_readSealevelPressure());
+	serial_printf("Pressure at sealevel (calculated) = %d Pa\r\n",
+			bmp085_readSealevelPressure(30));
 
 	// you can get a more precise measurement of altitude
 	// if you know the current sea level pressure which will
 	// vary with weather and such. If it is 1015 millibars
 	// that is equal to 101500 Pascals.
-	serial_printf("Real altitude = %d M", bmp085_readAltitude(101500));
+	dtostrf(bmp085_readAltitude(102300), 16, 2, obuf);
+	serial_printf("Real altitude = \t%s M\r\n\r\n", obuf);
 
 	delay(3000);
 }
