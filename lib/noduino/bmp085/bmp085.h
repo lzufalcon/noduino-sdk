@@ -1,6 +1,9 @@
 /*
  *  Copyright (c) 2015 - 2025 MaiKe Labs
- *  Library for sensor
+ *
+ *  Library for BMP085 Digital pressure sensor 
+ *
+ *  This library is ported from adafruit Arduino BMP085 project
  *
  *	This program is free software: you can redistribute it and/or modify
  *	it under the terms of the GNU General Public License as published by
@@ -50,12 +53,12 @@
 
 
 bool bmp085_begin();  // by default go highres
-float bmp085_readTemperature(void);
+float bmp085_readTemperature();
 float bmp085_readAltitude(float sealevelPressure); // std atmosphere
-int32_t bmp085_readPressure(void);
+int32_t bmp085_readPressure();
 int32_t bmp085_readSealevelPressure(float altitude_meters);
-uint16_t bmp085_readRawTemperature(void);
-uint32_t bmp085_readRawPressure(void);
+uint16_t bmp085_readRawTemperature();
+uint32_t bmp085_readRawPressure();
   
 int32_t bmp085_computeB5(int32_t UT);
 uint8_t bmp085_read8(uint8_t addr);

@@ -1,6 +1,8 @@
 /*
  *  Copyright (c) 2015 - 2025 MaiKe Labs
- *  Library for sensor BMP085
+ *
+ *  Library for BMP085 Digital pressure sensor 
+ *
  *  This library is ported from adafruit Arduino BMP085 project
  *
  *	This program is free software: you can redistribute it and/or modify
@@ -46,19 +48,19 @@ bool ICACHE_FLASH_ATTR bmp085_begin()
   mc = bmp085_read16(BMP085_CAL_MC);
   md = bmp085_read16(BMP085_CAL_MD);
 #if (BMP085_DEBUG == 1)
-  serial_printf("ac1 = %d",ac1);
-  serial_printf("ac2 = %d",ac2);
-  serial_printf("ac3 = %d",ac3);
-  serial_printf("ac4 = %d",ac4);
-  serial_printf("ac5 = %d",ac5);
-  serial_printf("ac6 = %d",ac6);
+  serial_printf("ac1 = %d\r\n",ac1);
+  serial_printf("ac2 = %d\r\n",ac2);
+  serial_printf("ac3 = %d\r\n",ac3);
+  serial_printf("ac4 = %d\r\n",ac4);
+  serial_printf("ac5 = %d\r\n",ac5);
+  serial_printf("ac6 = %d\r\n",ac6);
 
-  serial_printf("b1 = %d",b1);
-  serial_printf("b2 = %d",b2);
+  serial_printf("b1 = %d\r\n",b1);
+  serial_printf("b2 = %d\r\n",b2);
 
-  serial_printf("mb = %d",mb);
-  serial_printf("mc = %d",mc);
-  serial_printf("md = %d",md);
+  serial_printf("mb = %d\r\n",mb);
+  serial_printf("mc = %d\r\n",mc);
+  serial_printf("md = %d\r\n",md);
 #endif
 
   return true;
@@ -71,17 +73,17 @@ int32_t ICACHE_FLASH_ATTR bmp085_computeB5(int32_t UT)
   return X1 + X2;
 }
 
-uint16_t ICACHE_FLASH_ATTR bmp085_readRawTemperature(void)
+uint16_t ICACHE_FLASH_ATTR bmp085_readRawTemperature()
 {
   bmp085_write8(BMP085_CONTROL, BMP085_READTEMPCMD);
   delay(5);
 #if BMP085_DEBUG == 1
-  serial_printf("Raw temp: %d", bmp085_read16(BMP085_TEMPDATA));
+  serial_printf("Raw temp: %d\r\n", bmp085_read16(BMP085_TEMPDATA));
 #endif
   return bmp085_read16(BMP085_TEMPDATA);
 }
 
-uint32_t ICACHE_FLASH_ATTR bmp085_readRawPressure(void)
+uint32_t ICACHE_FLASH_ATTR bmp085_readRawPressure()
 {
   uint32_t raw;
 
@@ -111,13 +113,13 @@ uint32_t ICACHE_FLASH_ATTR bmp085_readRawPressure(void)
  */
 
 #if BMP085_DEBUG == 1
-  serial_printf("Raw pressure: %d\n", raw);
+  serial_printf("Raw pressure: %d\r\n", raw);
 #endif
   return raw;
 }
 
 
-int32_t ICACHE_FLASH_ATTR bmp085_readPressure(void)
+int32_t ICACHE_FLASH_ATTR bmp085_readPressure()
 {
   int32_t UT, UP, B3, B5, B6, X1, X2, X3, p;
   uint32_t B4, B7;
@@ -145,9 +147,9 @@ int32_t ICACHE_FLASH_ATTR bmp085_readPressure(void)
   B5 = bmp085_computeB5(UT);
 
 #if BMP085_DEBUG == 1
-  Serial.printf("X1 = "); Serial.printfln(X1);
-  Serial.printf("X2 = "); Serial.printfln(X2);
-  Serial.printf("B5 = "); Serial.printfln(B5);
+  serial_printf("X1 = %d\r\n", X1);
+  serial_printf("X2 = %d\r\n", X2);
+  serial_printf("B5 = %d\r\n", B5);
 #endif
 
   // do pressure calcs
@@ -158,10 +160,10 @@ int32_t ICACHE_FLASH_ATTR bmp085_readPressure(void)
   B3 = ((((int32_t)ac1*4 + X3) << bmp085_oversampling) + 2) / 4;
 
 #if BMP085_DEBUG == 1
-  Serial.printf("B6 = "); Serial.printfln(B6);
-  Serial.printf("X1 = "); Serial.printfln(X1);
-  Serial.printf("X2 = "); Serial.printfln(X2);
-  Serial.printf("B3 = "); Serial.printfln(B3);
+  serial_printf("B6 = %d\r\n", B6);
+  serial_printf("X1 = %d\r\n", X1);
+  serial_printf("X2 = %d\r\n", X2);
+  serial_printf("B3 = %d\r\n", B3);
 #endif
 
   X1 = ((int32_t)ac3 * B6) >> 13;
@@ -171,10 +173,10 @@ int32_t ICACHE_FLASH_ATTR bmp085_readPressure(void)
   B7 = ((uint32_t)UP - B3) * (uint32_t)( 50000UL >> bmp085_oversampling );
 
 #if BMP085_DEBUG == 1
-  Serial.printf("X1 = "); Serial.printfln(X1);
-  Serial.printf("X2 = "); Serial.printfln(X2);
-  Serial.printf("B4 = "); Serial.printfln(B4);
-  Serial.printf("B7 = "); Serial.printfln(B7);
+  serial_printf("X1 = %d\r\n", X1);
+  serial_printf("X2 = %d\r\n", X2);
+  serial_printf("B4 = %d\r\n", B4);
+  serial_printf("B7 = %d\r\n", B7);
 #endif
 
   if (B7 < 0x80000000) {
@@ -187,14 +189,14 @@ int32_t ICACHE_FLASH_ATTR bmp085_readPressure(void)
   X2 = (-7357 * p) >> 16;
 
 #if BMP085_DEBUG == 1
-  Serial.printf("p = "); Serial.printfln(p);
-  Serial.printf("X1 = "); Serial.printfln(X1);
-  Serial.printf("X2 = "); Serial.printfln(X2);
+  serial_printf("p = %d\r\n", p);
+  serial_printf("X1 = %d\r\n", X1);
+  serial_printf("X2 = %d\r\n", X2);
 #endif
 
   p = p + ((X1 + X2 + (int32_t)3791)>>4);
 #if BMP085_DEBUG == 1
-  serial_printf("p = %d\n", p); 
+  serial_printf("p = %d\r\n", p); 
 #endif
   return p;
 }
@@ -205,14 +207,15 @@ int32_t ICACHE_FLASH_ATTR bmp085_readSealevelPressure(float altitude_meters)
   return (int32_t)(pressure / pow(1.0-altitude_meters/44330, 5.255));
 }
 
-float ICACHE_FLASH_ATTR bmp085_readTemperature(void)
+float ICACHE_FLASH_ATTR bmp085_readTemperature()
 {
   int32_t UT, B5;     // following ds convention
-  float temp;
+  float temp = 0;
 
   UT = bmp085_readRawTemperature();
 
 #if BMP085_DEBUG == 1
+  serial_printf("readTemp: UT: %d\r\n", UT);
   // use datasheet numbers!
   UT = 27898;
   ac6 = 23153;
@@ -222,9 +225,8 @@ float ICACHE_FLASH_ATTR bmp085_readTemperature(void)
 #endif
 
   B5 = bmp085_computeB5(UT);
-  temp = (B5+8) >> 4;
-  temp /= 10;
-  
+  temp = (((float)B5 + 8) / 16) / 10;
+
   return temp;
 }
 
