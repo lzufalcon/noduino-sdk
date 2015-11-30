@@ -44,9 +44,10 @@ extern "C" {
 #include "stdlib_noniso.h"
 
 #include "serial.h"
-
 #include "esp8266_peri.h"
+
 #include "twi.h"
+#include "i2c.h"
 //#include "binary.h"
 
 #define HIGH 0x1
