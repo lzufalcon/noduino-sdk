@@ -22,6 +22,7 @@
 */
 
 #include "noduino.h"
+#include "bmp085.h"
 
 irom void setup()
 {
