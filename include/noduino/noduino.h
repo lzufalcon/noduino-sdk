@@ -20,6 +20,8 @@
 #ifndef __noduino_h__
 #define __noduino_h__
 
+#define	irom	__attribute__((section(".irom0.text")))
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -136,7 +138,7 @@ void timer0_detachInterrupt(void);
 #undef abs
 #endif
 
-#define abs(x) ((x)>0?(x):-(x))
+//#define abs(x) ((x)>0?(x):-(x))
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))
 #define radians(deg) ((deg)*DEG_TO_RAD)
