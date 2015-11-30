@@ -26,18 +26,18 @@ void loop()
 {
 	int addr = 9;
 
-	serial_print("Hello World!\n");		// only print strings
+	serial_print("Hello World!\r\n");		// only print strings
 
-	serial_printf("%d, %s, %p, 0x%X\n",
+	serial_printf("%d, %s, %p, 0x%X\r\n",
 		  			addr, "Hello World!", &addr, 128);
 
-	serial_printf("%f\n", 11.2);		// can not support float
+	serial_printf("%f\r\n", 11.2);		// can not support float
 
 	// print float or double:
 	char out_buf[7];
-	serial_printf("float: |%s|\n", dtostrf(13.6672, 6, 3, out_buf));
-	serial_printf("float: |%s|\n", dtostrf(13.6672, 6, 1, out_buf));
-	serial_printf("float: |%s|\n", dtostrf(13.6672, 3, 3, out_buf));
+	serial_printf("float: |%s|\r\n", dtostrf(13.6672, 6, 3, out_buf));
+	serial_printf("float: |%s|\r\n", dtostrf(13.6672, 6, 1, out_buf));
+	serial_printf("float: |%s|\r\n", dtostrf(13.6672, 3, 3, out_buf));
 
 	delay(1800);						// delay 1800ms
 }
