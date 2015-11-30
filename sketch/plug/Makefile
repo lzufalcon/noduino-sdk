@@ -1,10 +1,12 @@
 #
 # Copyright (c) 2015 MaiKe Labs
 #
+# Based on official ESPSDK and source-code-examples project
+#
 #
 
 # name for the target project
-TARGET		= app
+TARGET		= plug
 
 # which modules (subdirectories) of the project to include in compiling
 MODULES		= user
@@ -13,13 +15,14 @@ BUILD_DIR	= build
 FW_BASE		= build
 
 # base directory of the SDK package, absolute
-SDK_BASE		?= ../../
+SDK_BASE		?= ../..
 ESPSDK_BASE		?= $(SDK_BASE)/sdk
 TOOLCHAIN_DIR	?= $(SDK_BASE)/toolchain
 
 # paths from the SDK used in this project
-SDK_INCDIR	= include include/driver
-SDK_LIBDIR = lib
+SDK_INCDIR	= include include/noduino
+SDK_LIBDIR	= lib
+SDK_LDDIR	= ld
 
 # various paths from the ESPSDK used in this project
 ESPSDK_INCDIR	= include include/json
@@ -27,9 +30,9 @@ ESPSDK_LIBDIR	= lib
 ESPSDK_LDDIR	= ld
 
 # libraries used in this project, mainly provided by the ESPSDK
-LIBS		:= gcc
+LIBS		:= gcc mirom
 LIBS		+= crypto espnow json lwip_536 lwip mesh net80211 phy pp pwm smartconfig ssl upgrade wpa wps main
-LIBS		+= driver airkiss mqtt
+LIBS		+= noduino mqtt airkiss
 
 # esptool path and port
 ifeq ($(OS),Windows_NT)
@@ -58,7 +61,7 @@ AR		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-ar
 LD		:= $(TOOLCHAIN_DIR)/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc
 
 # compiler flags using during compilation of source files
-CFLAGS		= -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
+CFLAGS		= -Os -g -O2 -Wpointer-arith -Wundef -Werror -Wl,-EL -fno-inline-functions -nostdlib -mlongcalls -mtext-section-literals  -D__ets__ -DICACHE_FLASH
 
 # linker flags used to generate the main object file
 LDFLAGS		= -nostdlib -Wl,--no-check-sections -u call_user_start -Wl,-static
@@ -84,7 +87,7 @@ SDK_LIBDIR		:= $(addprefix -L$(SDK_BASE)/,$(SDK_LIBDIR))
 
 ESPSDK_INCDIR	:= $(addprefix -I$(ESPSDK_BASE)/,$(ESPSDK_INCDIR))
 ESPSDK_LIBDIR	:= $(addprefix -L$(ESPSDK_BASE)/,$(ESPSDK_LIBDIR))
-LD_SCRIPT		:= $(addprefix -T$(ESPSDK_BASE)/$(ESPSDK_LDDIR)/,$(LD_SCRIPT))
+LD_SCRIPT		:= $(addprefix -T$(SDK_BASE)/$(SDK_LDDIR)/,$(LD_SCRIPT))
 
 INCDIR			:= $(addprefix -I,$(SRC_DIR))
 MODULE_INCDIR	:= -I include
@@ -144,10 +147,7 @@ firmware:
 	$(Q) mkdir -p $@
 
 flash: all $(FW_BASE)/0x00000.bin $(FW_BASE)/0x40000.bin
-	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x00000 -cf $(FW_BASE)/0x00000.bin -ca 0x40000 -cf $(FW_BASE)/0x40000.bin
-
-zero:
-	-$(ESPTOOL) -cd nodemcu -cb 115200 -cp $(ESPPORT) -ca 0x3FE000 -cf $(ESPSDK_BASE)/bin/blank.bin
+	-$(ESPTOOL) -cd nodemcu -cb 230400 -cp $(ESPPORT) -ca 0x00000 -cf $(FW_BASE)/0x00000.bin -ca 0x40000 -cf $(FW_BASE)/0x40000.bin
 
 clean:
 	$(Q) rm -f $(APP_AR)

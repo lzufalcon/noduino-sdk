@@ -15,17 +15,11 @@
  *	along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-#include "ets_sys.h"
-#include "osapi.h"
-#include "ip_addr.h"
-#include "user_interface.h"
-#include "espconn.h"
-#include "os_type.h"
-#include "mem.h"
-#include "gpio.h"
 
-#include "driver/uart.h"
+#include "noduino.h"
+
 #include "airkiss.h"
+#include "espconn.h"
 #include "smartconfig.h"
 #include "mqtt/mqtt.h"
 
@@ -58,7 +52,7 @@ const airkiss_config_t akconf = {
 	0
 };
 
-static void ICACHE_FLASH_ATTR time_callback(void)
+static irom void time_callback(void)
 {
 	airkiss_udp.remote_port = DEFAULT_LAN_PORT;
 	airkiss_udp.remote_ip[0] = 255;
@@ -73,25 +67,25 @@ static void ICACHE_FLASH_ATTR time_callback(void)
 
 	if (ret != AIRKISS_LAN_PAKE_READY) {
 #ifdef DEBUG
-		uart0_sendStr("Pack lan packet error!\r\n");
+		serial_printf("Pack lan packet error!\r\n");
 #endif
 		return;
 	}
 	ret = espconn_sent(&ptrairudpconn, lan_buf, lan_buf_len);
 	if (ret != 0) {
-		uart0_sendStr("UDP send error!\r\n");
+		serial_printf("UDP send error!\r\n");
 	}
 #ifdef DEBUG
-	uart0_sendStr("Finish send notify!\r\n");
+	serial_printf("Finish send notify!\r\n");
 #endif
 }
 
-void ICACHE_FLASH_ATTR airkiss_nff_stop(void)
+irom void airkiss_nff_stop(void)
 {
 	os_timer_disarm(&time_serv);
 }
 
-void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
+irom void wifilan_recv_callbk(void *arg, char *pdata, unsigned short len)
 {
 	airkiss_lan_ret_t ret = airkiss_lan_recv(pdata, len, &akconf);
 	airkiss_lan_ret_t packret;
@@ -107,25 +101,25 @@ void ICACHE_FLASH_ATTR wifilan_recv_callbk(void *arg, char *pdata, unsigned shor
 					   lan_buf, &lan_buf_len, &akconf);
 
 		if (packret != AIRKISS_LAN_PAKE_READY) {
-			uart0_sendStr("Pack lan packet error!\r\n");
+			serial_printf("Pack lan packet error!\r\n");
 			return;
 		}
 
 		packret = espconn_sent(&ptrairudpconn, lan_buf, lan_buf_len);
 
 		if (packret != 0) {
-			uart0_sendStr("LAN UDP Send err!\r\n");
+			serial_printf("LAN UDP Send err!\r\n");
 		} else {
 			airkiss_nff_stop();
 		}
 		break;
 	default:
-		uart0_sendStr("Pack is not ssdq req!\r\n");
+		serial_printf("Pack is not ssdq req!\r\n");
 		break;
 	}
 }
 
-void ICACHE_FLASH_ATTR airkiss_nff_start(void)
+irom void airkiss_nff_start(void)
 {
 	airkiss_udp.local_port = 12476;
 	ptrairudpconn.type = ESPCONN_UDP;
@@ -138,41 +132,41 @@ void ICACHE_FLASH_ATTR airkiss_nff_start(void)
 	os_timer_arm(&time_serv, 5000, 1);	//5s定时器
 }
 
-void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
+irom void smartconfig_done(sc_status status, void *pdata)
 {
 	switch (status) {
 	case SC_STATUS_WAIT:
-		os_printf("SC_STATUS_WAIT\n");
+		serial_printf("SC_STATUS_WAIT\n");
 		break;
 	case SC_STATUS_FIND_CHANNEL:
-		os_printf("SC_STATUS_FIND_CHANNEL\n");
+		serial_printf("SC_STATUS_FIND_CHANNEL\n");
 		break;
 	case SC_STATUS_GETTING_SSID_PSWD:
-		os_printf("SC_STATUS_GETTING_SSID_PSWD\n");
+		serial_printf("SC_STATUS_GETTING_SSID_PSWD\n");
 		sc_type *type = pdata;
 		if (*type == SC_TYPE_ESPTOUCH) {
-			os_printf("SC_TYPE:SC_TYPE_ESPTOUCH\n");
+			serial_printf("SC_TYPE:SC_TYPE_ESPTOUCH\n");
 		} else {
-			os_printf("SC_TYPE:SC_TYPE_AIRKISS\n");
+			serial_printf("SC_TYPE:SC_TYPE_AIRKISS\n");
 		}
 		break;
 	case SC_STATUS_LINK:
-		os_printf("SC_STATUS_LINK\n");
+		serial_printf("SC_STATUS_LINK\n");
 		struct station_config *sta_conf = pdata;
 
-		os_printf("Store the ssid and password into flash\n");
+		serial_printf("Store the ssid and password into flash\n");
 		wifi_station_set_config(sta_conf);
 
 		wifi_station_disconnect();
 		wifi_station_connect();
 		break;
 	case SC_STATUS_LINK_OVER:
-		os_printf("SC_STATUS_LINK_OVER\n");
+		serial_printf("SC_STATUS_LINK_OVER\n");
 		if (pdata != NULL) {
 			uint8 phone_ip[4] = { 0 };
 
 			os_memcpy(phone_ip, (uint8 *) pdata, 4);
-			os_printf("Phone ip: %d.%d.%d.%d\n", phone_ip[0],
+			serial_printf("Phone ip: %d.%d.%d.%d\n", phone_ip[0],
 				  phone_ip[1], phone_ip[2], phone_ip[3]);
 		}
 		smartconfig_stop();
@@ -181,27 +175,27 @@ void ICACHE_FLASH_ATTR smartconfig_done(sc_status status, void *pdata)
 
 }
 
-void ICACHE_FLASH_ATTR mqttConnectedCb(uint32_t *args)
+irom void mqttConnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
-	os_printf("MQTT: Connected\r\n");
+	serial_printf("MQTT: Connected\r\n");
 	MQTT_Subscribe(client, "/app2dev/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", 0);
 	MQTT_Publish(client, "/dev2app/gh_95fae1ba6fa0_8312db1c74a6d97d04063fb88d9a8e47", "online", 6, 0, 0);
 }
 
-void ICACHE_FLASH_ATTR mqttDisconnectedCb(uint32_t *args)
+irom void mqttDisconnectedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
-	os_printf("MQTT: Disconnected\r\n");
+	serial_printf("MQTT: Disconnected\r\n");
 }
 
-void ICACHE_FLASH_ATTR mqttPublishedCb(uint32_t *args)
+irom void mqttPublishedCb(uint32_t *args)
 {
 	MQTT_Client* client = (MQTT_Client*)args;
-	os_printf("MQTT: Published\r\n");
+	serial_printf("MQTT: Published\r\n");
 }
 
-void ICACHE_FLASH_ATTR mqttDataCb (uint32_t *args, const char* topic,
+irom void mqttDataCb (uint32_t *args, const char* topic,
 	   	uint32_t topic_len, const char *data, uint32_t data_len)
 {
 	char *topicBuf = (char*)os_zalloc(topic_len+1),
@@ -217,21 +211,21 @@ void ICACHE_FLASH_ATTR mqttDataCb (uint32_t *args, const char* topic,
 
 	if(os_strncmp(dataBuf, "on", 2) == 0)
 	{
-		os_printf("set gpio12 to high\n");
-		gpio_output_set(BIT12, 0, BIT12, 0);
+		serial_printf("Turn on the plug\n");
+		digitalWrite(12, HIGH);
 	}
 	if(os_strncmp(dataBuf, "off", 3) == 0)
 	{
-		os_printf("set gpio12 to low\n");
-		gpio_output_set(0, BIT12, BIT12, 0);
+		serial_printf("Turn off the plug\n");
+		digitalWrite(12, LOW);
 	}
 
-	os_printf("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
+	serial_printf("Receive topic: %s, data: %s \r\n", topicBuf, dataBuf);
 	os_free(topicBuf);
 	os_free(dataBuf);
 }
 
-void ICACHE_FLASH_ATTR cos_check_ip()
+irom void cos_check_ip()
 {
 	struct ip_info ipconfig;
 
@@ -269,37 +263,29 @@ void ICACHE_FLASH_ATTR cos_check_ip()
 	}
 }
 
-void ICACHE_FLASH_ATTR user_init(void)
+irom void setup(void)
 {
-#ifdef DEBUG
-	uart_init(115200, 115200);
-#endif
-
-	//Initialize the GPIO subsystem.
-	gpio_init();
-
-	//Set GPIO2 to output mode
-	//PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+	serial_begin(115200);
 
 	//Set GPIO12 to output mode
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, FUNC_GPIO12);
+	pinMode(12, OUTPUT);
 
-	//Set GPIO2 high, blue led off
-	//gpio_output_set(BIT2, 0, BIT2, 0);
-	
 	// set gpio12 low
-	gpio_output_set(0, BIT12, BIT12, 0);
+	digitalWrite(12, LOW);
 
 	MQTT_InitConnection(&mqttClient, "101.200.202.247", 1883, 0);
 	MQTT_InitClient(&mqttClient, "noduino_falcon", mqtt_uname, mqtt_pass, 120, 1);
-
-	//MQTT_InitLWT(&mqttClient, "/lwt", "offline", 0, 0);
-
 	MQTT_OnConnected(&mqttClient, mqttConnectedCb);
 	MQTT_OnDisconnected(&mqttClient, mqttDisconnectedCb);
 	MQTT_OnPublished(&mqttClient, mqttPublishedCb);
 	MQTT_OnData(&mqttClient, mqttDataCb);
 
-	os_printf("\r\nSystem started ...\r\n");
-	system_init_done_cb(cos_check_ip);
+	serial_printf("\r\nSystem started ...\r\n");
+
+	cos_check_ip();
+}
+
+irom void loop(void)
+{
+
 }
